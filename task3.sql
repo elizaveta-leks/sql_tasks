@@ -140,6 +140,24 @@ ORDER BY s."DATE", sh."CITY";
 /* Выведите информацию о топ-3 товарах по продажам в штуках в каждом магазине в каждую дату.
     Столбцы в результирующей таблице: DATE_ , SHOPNUMBER, ID_GOOD */
 
+SELECT
+    "DATE",
+    "SHOPNUMBER",
+    "ID_GOOD"
+FROM (
+    SELECT
+        s."DATE",
+        s."SHOPNUMBER",
+        g."ID_GOOD",
+        SUM(s."QTY") AS TOTAL_SALES,
+        RANK() OVER (PARTITION BY s."DATE", s."SHOPNUMBER" ORDER BY SUM(s."QTY") DESC) AS sales_rank
+    FROM sales s
+    JOIN goods g ON s."ID_GOOD" = g."ID_GOOD"
+    GROUP BY s."DATE", s."SHOPNUMBER", g."ID_GOOD"
+) AS ranked_sales
+WHERE ranked_sales.sales_rank <= 3  -- Отбираем только топ-3 товара для каждой даты и магазина
+ORDER BY ranked_sales."DATE", ranked_sales."SHOPNUMBER", ranked_sales.sales_rank;
+
 
 
 
